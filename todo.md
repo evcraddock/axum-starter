@@ -42,7 +42,7 @@
 
 - [x] **5.1**: In `health::routes.rs`, implement `pub fn routes() -> Router`.
 - [x] **5.2**: In `health::handlers.rs`, implement `get_health` to return `{"status":"ok"}`.
-- [ ] **5.3**: Update `main.rs` to mount `/api/health` on the router.
+- [x] **5.3**: Update `main.rs` to mount `/api/health` on the router.
 - [x] **5.4**: Write a unit test to confirm a 200 response with `{"status":"ok"}`.
 
 ---

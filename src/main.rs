@@ -8,8 +8,18 @@ use tracing_subscriber::FmtSubscriber;
 // Build the application router
 pub fn app() -> Router {
     Router::new()
+        // Original routes
         .merge(health::routes::routes())
         .merge(clients::routes::routes())
+        // API routes with proper nesting
+        .nest("/api", api_routes())
+}
+
+// Define API routes
+fn api_routes() -> Router {
+    Router::new()
+        .nest("/health", health::routes::api_routes())
+        .nest("/clients", clients::routes::api_routes())
 }
 
 #[tokio::main]
@@ -42,7 +52,7 @@ mod tests {
     use tower::util::ServiceExt;
 
     #[tokio::test]
-    async fn test_health_endpoint() {
+    async fn test_original_health_endpoint() {
         let app = app();
 
         let response = app
@@ -54,11 +64,35 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_clients_endpoint() {
+    async fn test_original_clients_endpoint() {
         let app = app();
 
         let response = app
             .oneshot(Request::builder().uri("/clients").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_api_health_endpoint() {
+        let app = app();
+
+        let response = app
+            .oneshot(Request::builder().uri("/api/health").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_api_clients_endpoint() {
+        let app = app();
+
+        let response = app
+            .oneshot(Request::builder().uri("/api/clients").body(Body::empty()).unwrap())
             .await
             .unwrap();
 

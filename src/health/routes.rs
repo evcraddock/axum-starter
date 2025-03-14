@@ -10,6 +10,11 @@ pub fn routes() -> Router {
         .route("/health", get(handlers::health_check))
 }
 
+pub fn api_routes() -> Router {
+    Router::new()
+        .route("/", get(handlers::health_check))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -27,6 +32,23 @@ mod tests {
 
         let response = app
             .oneshot(Request::builder().uri("/health").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        
+        assert_eq!(body, json!({"status": "UP"}));
+    }
+    
+    #[tokio::test]
+    async fn test_api_health_route() {
+        let app = api_routes();
+
+        let response = app
+            .oneshot(Request::builder().uri("/").body(Body::empty()).unwrap())
             .await
             .unwrap();
 
