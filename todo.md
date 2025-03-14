@@ -49,7 +49,7 @@
 
 ## 6. Clients Route (Secured)
 
-- [ ] **6.1**: Add a placeholder `auth_middleware` that checks for a Bearer token in the `Authorization` header.
+- [x] **6.1**: Add a placeholder `auth_middleware` that checks for a Bearer token in the `Authorization` header.
 - [x] **6.2**: In `clients::routes.rs`, mount `/api/clients` behind the auth middleware.
 - [x] **6.3**: In `clients::handlers.rs`, create `get_clients` returning `{"message":"Clients endpoint"}`.
 - [x] **6.4**: Test 401 response if missing/invalid token, and 200 if valid token.

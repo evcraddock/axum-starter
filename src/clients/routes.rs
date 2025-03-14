@@ -11,8 +11,10 @@ pub fn routes() -> Router {
 }
 
 pub fn api_routes() -> Router {
+    // This router doesn't include authentication yet - 
+    // Authentication will be added in main.rs
     Router::new()
-        .route("/", get(handlers::get_clients))
+        .route("/", get(handlers::get_secured_clients))
 }
 
 #[cfg(test)]
@@ -57,10 +59,8 @@ mod tests {
         assert_eq!(response.status(), StatusCode::OK);
 
         let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
-        let clients: Vec<Client> = serde_json::from_slice(&body).unwrap();
+        let response_data: handlers::ClientResponse = serde_json::from_slice(&body).unwrap();
         
-        assert_eq!(clients.len(), 1);
-        assert_eq!(clients[0].id, "1");
-        assert_eq!(clients[0].name, "Example Client");
+        assert_eq!(response_data.message, "Clients endpoint");
     }
 }

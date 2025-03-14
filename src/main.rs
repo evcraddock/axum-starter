@@ -2,6 +2,7 @@ mod health;
 mod clients;
 mod config;
 mod errors;
+mod auth;
 
 use std::{net::SocketAddr, panic::AssertUnwindSafe};
 use axum::{
@@ -60,11 +61,24 @@ pub fn app() -> Router {
         .layer(middleware::from_fn(panic_handler))
 }
 
+// Helper function to create secured routes
+fn secured_routes() -> Router {
+    Router::new()
+        .nest("/clients", clients::routes::api_routes())
+        // Additional secured routes can be added here
+        // For example:
+        // .nest("/admin", admin::routes::api_routes())
+        // .nest("/users", users::routes::api_routes())
+        .layer(middleware::from_fn(auth::auth_middleware))
+}
+
 // Define API routes
 fn api_routes() -> Router {
     Router::new()
+        // Public routes don't need authentication
         .nest("/health", health::routes::api_routes())
-        .nest("/clients", clients::routes::api_routes())
+        // Secured routes that require authentication
+        .merge(secured_routes())
 }
 
 #[tokio::main]
@@ -163,8 +177,15 @@ mod tests {
     async fn test_api_clients_endpoint() {
         let app = app();
 
+        // Need to include auth token for secured routes
         let response = app
-            .oneshot(Request::builder().uri("/api/clients").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/api/clients")
+                    .header("Authorization", auth::DEV_TOKEN)
+                    .body(Body::empty())
+                    .unwrap()
+            )
             .await
             .unwrap();
 
@@ -192,6 +213,70 @@ mod tests {
         // Verify the error structure
         assert_eq!(body["error"]["status"], 404);
         assert_eq!(body["error"]["message"], "Route not found");
+    }
+    
+    // Test secured route with no authentication
+    #[tokio::test]
+    async fn test_secured_route_no_auth() {
+        let app = app();
+
+        // Request to secured endpoint without token
+        let response = app
+            .oneshot(Request::builder().uri("/api/clients").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        // Should get 401 Unauthorized
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    // Test secured route with invalid token
+    #[tokio::test]
+    async fn test_secured_route_invalid_token() {
+        let app = app();
+
+        // Request to secured endpoint with invalid token
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/api/clients")
+                    .header("Authorization", "Bearer wrong_token")
+                    .body(Body::empty())
+                    .unwrap()
+            )
+            .await
+            .unwrap();
+
+        // Should get 401 Unauthorized
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    // Test secured route with valid token
+    #[tokio::test]
+    async fn test_secured_route_valid_token() {
+        let app = app();
+
+        // Request to secured endpoint with valid token
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/api/clients")
+                    .header("Authorization", crate::auth::DEV_TOKEN)
+                    .body(Body::empty())
+                    .unwrap()
+            )
+            .await
+            .unwrap();
+
+        // Should get 200 OK
+        assert_eq!(response.status(), StatusCode::OK);
+
+        // Extract and verify the response body
+        let body_bytes = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let body: Value = serde_json::from_slice(&body_bytes).unwrap();
+
+        // Check it contains the expected message
+        assert_eq!(body["message"], "Clients endpoint");
     }
 
     // This is a test of the request 404 handler, not the panic handler

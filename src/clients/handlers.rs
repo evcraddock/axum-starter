@@ -7,6 +7,19 @@ pub struct Client {
     pub name: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct ClientResponse {
+    pub message: String,
+}
+
+// Handler for secured endpoint that returns simple message
+pub async fn get_secured_clients() -> Json<ClientResponse> {
+    Json(ClientResponse {
+        message: "Clients endpoint".to_string(),
+    })
+}
+
+// Original handler for backward compatibility
 pub async fn get_clients() -> Json<Vec<Client>> {
     Json(vec![
         Client {

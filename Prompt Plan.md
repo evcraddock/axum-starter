@@ -130,7 +130,7 @@ We should be able to run the server and curl `/api/health` to see `{"status":"ok
 **Prompt 6: Clients Route (Secured)**
 
 ```
-Now let’s add a placeholder secured route at `/api/clients`.
+Now if necessary add a placeholder secured route at `/api/clients`.
 
 **Goal**:
 - A route that returns `{"message":"Clients endpoint"}` on success.
