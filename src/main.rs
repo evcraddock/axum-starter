@@ -1,5 +1,6 @@
 mod health;
 mod clients;
+mod config;
 
 use axum::Router;
 use std::net::SocketAddr;
@@ -30,6 +31,14 @@ async fn main() {
         .finish();
     tracing::subscriber::set_global_default(subscriber)
         .expect("Failed to set subscriber");
+        
+    // Load configuration
+    let config = config::load_config().unwrap_or_else(|err| {
+        eprintln!("Failed to load configuration: {}", err);
+        std::process::exit(1);
+    });
+    
+    tracing::info!("Application configuration loaded: run_mode={}", config.run_mode);
 
     // Build our application
     let app = app();
