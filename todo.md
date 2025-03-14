@@ -31,10 +31,10 @@
 
 ## 4. Error Handling
 
-- [ ] **4.1**: Create an `AppError` enum/struct in `src/errors.rs`.
-- [ ] **4.2**: Implement `IntoResponse` for `AppError` to return structured JSON errors.
-- [ ] **4.3**: Add a global panic/fallback handler that returns a 500 JSON response for unexpected errors.
-- [ ] **4.4**: Write a test that induces a panic and checks for a 500 response.
+- [x] **4.1**: Create an `AppError` struct in `src/errors.rs`.
+- [x] **4.2**: Implement `IntoResponse` for `AppError` to return structured JSON errors.
+- [x] **4.3**: Add a global panic/fallback handler that returns a 500 JSON response for unexpected errors.
+- [x] **4.4**: Write a test that induces a panic and checks for a 500 response.
 
 ---
 

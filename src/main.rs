@@ -1,10 +1,50 @@
 mod health;
 mod clients;
 mod config;
+mod errors;
 
-use axum::Router;
-use std::net::SocketAddr;
+use std::{net::SocketAddr, panic::AssertUnwindSafe};
+use axum::{
+    Router, 
+    response::IntoResponse,
+    middleware::{self, Next},
+    extract::Request,
+    http::StatusCode,
+};
 use tracing_subscriber::{fmt, EnvFilter, prelude::*};
+
+use crate::errors::{AppError, handle_panic};
+
+// Fallback handler for 404 errors
+async fn handle_404() -> impl IntoResponse {
+    AppError::not_found("Route not found")
+}
+
+// Middleware to catch panics and return 500 errors
+async fn panic_handler(
+    req: Request,
+    next: Next,
+) -> Result<axum::response::Response, (StatusCode, String)> {
+    // Use a closure that we can catch panics from
+    let response = std::panic::catch_unwind(AssertUnwindSafe(move || async move {
+        next.run(req).await
+    }));
+
+    // Handle the result
+    match response {
+        Ok(future) => {
+            // This runs the future if the closure didn't panic
+            match tokio::task::spawn(future).await {
+                Ok(response) => Ok(response),
+                Err(_) => Ok(handle_panic(Box::new("Task failed"))),
+            }
+        }
+        Err(panic) => {
+            // This handles the case where the closure panicked
+            Ok(handle_panic(panic))
+        }
+    }
+}
 
 // Build the application router
 pub fn app() -> Router {
@@ -14,6 +54,10 @@ pub fn app() -> Router {
         .merge(clients::routes::routes())
         // API routes with proper nesting
         .nest("/api", api_routes())
+        // Add 404 fallback
+        .fallback(handle_404)
+        // Add middleware with panic recovery
+        .layer(middleware::from_fn(panic_handler))
 }
 
 // Define API routes
@@ -74,15 +118,15 @@ async fn main() {
 mod tests {
     use super::*;
     use axum::{
-        body::Body,
-        http::{Request, StatusCode},
+        body::{Body, to_bytes}
     };
     use tower::util::ServiceExt;
+    use serde_json::Value;
+    use axum::http::Request;
 
     #[tokio::test]
     async fn test_original_health_endpoint() {
         let app = app();
-
         let response = app
             .oneshot(Request::builder().uri("/health").body(Body::empty()).unwrap())
             .await
@@ -125,5 +169,52 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::OK);
+    }
+    
+    // Test for not found (404) response
+    #[tokio::test]
+    async fn test_not_found() {
+        let app = app();
+
+        // Request to a non-existent endpoint
+        let response = app
+            .oneshot(Request::builder().uri("/nonexistent").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        // Check status code
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
+        // Extract and check the response body
+        let body_bytes = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let body: Value = serde_json::from_slice(&body_bytes).unwrap();
+
+        // Verify the error structure
+        assert_eq!(body["error"]["status"], 404);
+        assert_eq!(body["error"]["message"], "Route not found");
+    }
+
+    // This is a test of the request 404 handler, not the panic handler
+    #[tokio::test]
+    async fn test_404_handler() {
+        // Create a test app with only the 404 handler
+        let app = Router::new().fallback(handle_404);
+
+        // Send a request to a non-existent route
+        let response = app
+            .oneshot(Request::builder().uri("/nonexistent").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        // Check status code
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+
+        // Extract and check the response body
+        let body_bytes = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let body: Value = serde_json::from_slice(&body_bytes).unwrap();
+
+        // Verify the error structure
+        assert_eq!(body["error"]["status"], 404);
+        assert_eq!(body["error"]["message"], "Route not found");
     }
 }

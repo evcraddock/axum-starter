@@ -94,12 +94,13 @@ Next, we need a global error type and a panic handler.
 - Catch unexpected panics and convert them into a JSON `500` response.
 
 **Instructions**:
-1. In a new file `src/errors.rs` (or similar), define an `AppError` enum or struct with variants like `InternalError`, `Unauthorized`, etc.
+1. In a new file `src/errors.rs` (or similar), define an `AppError` struct with variants like `InternalError`, `Unauthorized`, etc.
 2. Implement `IntoResponse` for `AppError` so that Axum can convert it into JSON responses.
 3. In `main.rs`, add a global fallback or use `handle_error` for panics, returning a JSON body `{ "error": "Internal Server Error" }`.
 4. Write a small test in `src/errors.rs` or `src/main.rs` that shows how a panic in a handler returns a 500 response. (You can do a minimal integration test with `tower::ServiceExt::oneshot` if you like.)
 
 Include the updated code for `errors.rs` and any necessary changes to `main.rs`. The test can be inline or in a separate test file.
+Update todo.md with changes
 ```
 
 ---
