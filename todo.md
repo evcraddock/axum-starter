@@ -23,9 +23,9 @@
 
 ## 3. Logging Setup
 
-- [ ] **3.1**: Initialize `tracing` in `main.rs` for JSON log output.
-- [ ] **3.2**: Configure log levels for different environments (development/production).
-- [ ] **3.3**: Add a sample `info!("Startup complete")` to confirm JSON logging works.
+- [x] **3.1**: Initialize `tracing` in `main.rs` for JSON log output.
+- [x] **3.2**: Configure log levels for different environments (development/production).
+- [x] **3.3**: Add a sample `info!("Startup complete")` to confirm JSON logging works.
 
 ---
 
