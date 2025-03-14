@@ -14,10 +14,10 @@
 
 ## 2. Configuration Management
 
-- [ ] **2.1**: Add a `settings.toml` in the project root (with `run_mode = "local"` and a placeholder setting).
-- [ ] **2.2**: Implement a `config.rs` module to load these settings and merge environment variables (`APP_*` overrides).
-- [ ] **2.3**: Define an `AppConfig` struct for storing loaded settings.
-- [ ] **2.4**: Make the service exit if config is missing or invalid.
+- [x] **2.1**: Add a `settings.toml` in the project root (with `run_mode = "local"` and a placeholder setting).
+- [x] **2.2**: Implement a `config.rs` module to load these settings and merge environment variables (`APP_*` overrides).
+- [x] **2.3**: Define an `AppConfig` struct for storing loaded settings.
+- [x] **2.4**: Make the service exit if config is missing or invalid.
 
 ---
 
