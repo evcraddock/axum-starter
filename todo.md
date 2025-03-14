@@ -8,7 +8,7 @@
   - `src/health/` with `mod.rs`, `handlers.rs`, `routes.rs`
   - `src/clients/` with `mod.rs`, `handlers.rs`, `routes.rs`
 - [x] **1.4**: Ensure the project compiles via `cargo build`.
-- [ ] **1.5**: Confirm basic runtime with `cargo run`.
+- [x] **1.5**: Confirm basic runtime with `cargo run`.
 
 ---
 
