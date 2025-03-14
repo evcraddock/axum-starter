@@ -58,10 +58,10 @@
 
 ## 7. OpenAPI Documentation
 
-- [ ] **7.1**: Add libraries (`utoipa`, `utoipa-swagger-ui`) for OpenAPI generation.
-- [ ] **7.2**: Annotate endpoints/structs for doc generation or define schemas.
-- [ ] **7.3**: Serve OpenAPI JSON at `/api/openapi.json` and Swagger UI at `/api/docs`.
-- [ ] **7.4**: Test that `/api/docs` is accessible.
+- [x] **7.1**: Add libraries (`utoipa`, `utoipa-swagger-ui`) for OpenAPI generation.
+- [x] **7.2**: Annotate endpoints/structs for doc generation or define schemas.
+- [x] **7.3**: Serve OpenAPI JSON at `/api/openapi.json` and Swagger UI at `/api/docs`.
+- [x] **7.4**: Test that `/api/docs` is accessible.
 
 ---
 

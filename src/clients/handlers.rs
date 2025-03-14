@@ -1,25 +1,50 @@
 use axum::Json;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, ToSchema)]
 pub struct Client {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, ToSchema)]
 pub struct ClientResponse {
     pub message: String,
 }
 
-// Handler for secured endpoint that returns simple message
+/// Get clients endpoint (secured)
+/// 
+/// This endpoint requires authentication with a valid Bearer token.
+#[utoipa::path(
+    get,
+    path = "/api/clients",
+    tag = "clients",
+    security(
+        ("bearer_auth" = [])
+    ),
+    responses(
+        (status = 200, description = "Successfully retrieved clients message", body = ClientResponse),
+        (status = 401, description = "Unauthorized - Missing or invalid token")
+    )
+)]
 pub async fn get_secured_clients() -> Json<ClientResponse> {
     Json(ClientResponse {
         message: "Clients endpoint".to_string(),
     })
 }
 
-// Original handler for backward compatibility
+/// Get client list
+/// 
+/// Returns a list of clients.
+#[utoipa::path(
+    get,
+    path = "/clients",
+    tag = "clients",
+    responses(
+        (status = 200, description = "Successfully retrieved client list", body = Vec<Client>),
+    )
+)]
 pub async fn get_clients() -> Json<Vec<Client>> {
     Json(vec![
         Client {

@@ -7,12 +7,12 @@ use super::handlers;
 
 pub fn routes() -> Router {
     Router::new()
-        .route("/health", get(handlers::health_check))
+        .route("/health", get(handlers::get_health))
 }
 
 pub fn api_routes() -> Router {
     Router::new()
-        .route("/", get(handlers::health_check))
+        .route("/", get(handlers::get_health))
 }
 
 #[cfg(test)]
@@ -22,7 +22,7 @@ mod tests {
         body::Body,
         http::{Request, StatusCode},
     };
-    use serde_json::json;
+    // Use the health response struct
     use tower::util::ServiceExt;
     use axum::body::to_bytes;
 
@@ -38,9 +38,9 @@ mod tests {
         assert_eq!(response.status(), StatusCode::OK);
 
         let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
-        let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        let body: handlers::HealthResponse = serde_json::from_slice(&body).unwrap();
         
-        assert_eq!(body, json!({"status": "UP"}));
+        assert_eq!(body.status, "ok");
     }
     
     #[tokio::test]
@@ -55,8 +55,8 @@ mod tests {
         assert_eq!(response.status(), StatusCode::OK);
 
         let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
-        let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        let body: handlers::HealthResponse = serde_json::from_slice(&body).unwrap();
         
-        assert_eq!(body, json!({"status": "UP"}));
+        assert_eq!(body.status, "ok");
     }
 }

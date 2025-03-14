@@ -3,6 +3,7 @@ mod clients;
 mod config;
 mod errors;
 mod auth;
+mod openapi;
 
 use std::{net::SocketAddr, panic::AssertUnwindSafe};
 use axum::{
@@ -79,6 +80,8 @@ fn api_routes() -> Router {
         .nest("/health", health::routes::api_routes())
         // Secured routes that require authentication
         .merge(secured_routes())
+        // OpenAPI documentation
+        .merge(openapi::routes())
 }
 
 #[tokio::main]
@@ -131,9 +134,7 @@ async fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use axum::{
-        body::{Body, to_bytes}
-    };
+    use axum::body::{Body, to_bytes};
     use tower::util::ServiceExt;
     use serde_json::Value;
     use axum::http::Request;
@@ -301,5 +302,38 @@ mod tests {
         // Verify the error structure
         assert_eq!(body["error"]["status"], 404);
         assert_eq!(body["error"]["message"], "Route not found");
+    }
+    
+    // Test for OpenAPI docs endpoint
+    #[tokio::test]
+    async fn test_openapi_docs() {
+        let app = app();
+
+        // Request to the OpenAPI UI endpoint
+        let response = app
+            .oneshot(Request::builder().uri("/api/docs").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        // Should get a redirect (303) or OK (200) - both are valid
+        assert!(
+            response.status() == StatusCode::SEE_OTHER || 
+            response.status() == StatusCode::OK
+        );
+    }
+    
+    // Test for OpenAPI JSON endpoint
+    #[tokio::test]
+    async fn test_openapi_json() {
+        let app = app();
+
+        // Request to the OpenAPI JSON endpoint
+        let response = app
+            .oneshot(Request::builder().uri("/api/openapi.json").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+        // Should get 200 OK
+        assert_eq!(response.status(), StatusCode::OK);
     }
 }
