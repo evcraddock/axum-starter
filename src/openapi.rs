@@ -31,6 +31,10 @@ pub struct ApiDoc;
 
 /// Create routes for OpenAPI documentation
 pub fn routes() -> Router {
+    // Note that when mounted at /api, the full paths will be:
+    // - Swagger UI: /api/docs (which redirects to /api/docs/)
+    // - OpenAPI JSON: /api/openapi.json
     Router::new()
+        // This creates all the necessary routes for Swagger UI
         .merge(SwaggerUi::new("/docs").url("/openapi.json", ApiDoc::openapi()))
 }
