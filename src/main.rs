@@ -86,6 +86,15 @@ fn api_routes() -> Router {
 
 #[tokio::main]
 async fn main() {
+    // Parse CLI arguments
+    let args: Vec<String> = std::env::args().collect();
+    
+    // Check if this is a health check command
+    if args.len() > 1 && args[1] == "health" {
+        run_health_check().await;
+        return;
+    }
+    
     // Initialize JSON tracing
     let env_filter = EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| EnvFilter::new("axum_starter=debug,tower_http=debug"));
@@ -129,6 +138,30 @@ async fn main() {
     tracing::info!("Startup complete - server ready to accept connections");
     
     axum::serve(listener, app).await.unwrap();
+}
+
+// Run a health check by making a request to the health endpoint
+async fn run_health_check() {
+    let client = reqwest::Client::new();
+    let url = "http://localhost:3000/api/health";
+    
+    println!("Checking service health at {}...", url);
+    
+    match client.get(url).send().await {
+        Ok(response) => {
+            if response.status().is_success() {
+                println!("Service is running");
+                std::process::exit(0);
+            } else {
+                println!("Service is unavailable (status: {})", response.status());
+                std::process::exit(1);
+            }
+        },
+        Err(e) => {
+            println!("Service is unavailable: {}", e);
+            std::process::exit(1);
+        }
+    }
 }
 
 #[cfg(test)]

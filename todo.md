@@ -67,26 +67,26 @@
 
 ## 8. Command-Line Health Check
 
-- [ ] **8.1**: Parse CLI args (e.g., using `clap` or `std::env::args`) to detect `-- health`.
-- [ ] **8.2**: If subcommand is `health`, make an HTTP request to `/api/health`.
-- [ ] **8.3**: Print "Service is running" on 200, else "Service is unavailable".
-- [ ] **8.4**: Test or manually verify the output.
+- [x] **8.1**: Parse CLI args (e.g., using `clap` or `std::env::args`) to detect `-- health`.
+- [x] **8.2**: If subcommand is `health`, make an HTTP request to `/api/health`.
+- [x] **8.3**: Print "Service is running" on 200, else "Service is unavailable".
+- [x] **8.4**: Test or manually verify the output.
 
 ---
 
 ## 9. Dockerization
 
-- [ ] **9.1**: Create a multi-stage `Dockerfile`.
+- [x] **9.1**: Create a multi-stage `Dockerfile`.
   - Stage 1: Use Rust official image, build the project.
   - Stage 2: Copy binary into minimal base image.
-- [ ] **9.2**: Expose necessary port (e.g. 8080) and set `CMD ["./axum-starter"]`.
+- [x] **9.2**: Expose necessary port (3000) and set `CMD ["./axum-starter"]`.
 - [ ] **9.3**: Verify `docker build .` and `docker run` works; test `/api/health`.
 
 ---
 
 ## 10. Final Cleanup & README
 
-- [ ] **10.1**: Write a README.md explaining:
+- [x] **10.1**: Write a README.md explaining:
   - Project purpose
   - Configuration usage
   - Logging
@@ -94,7 +94,7 @@
   - Docker instructions
   - CLI health check
   - `/api/docs` for OpenAPI
-- [ ] **10.2**: Confirm all tests pass, no unused code or modules.
+- [x] **10.2**: Confirm all tests pass, no unused code or modules.
 - [ ] **10.3**: Optionally create a release or tag in Git if desired.
 
 ---

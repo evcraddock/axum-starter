@@ -17,6 +17,7 @@ anyhow = "1.0"
 bytes = "1.10.1"
 utoipa = { version = "4.2", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0", features = ["axum"] }
+reqwest = { version = "0.11", features = ["json"] }
 
 [dev-dependencies]
 tower-service = "0.3"
